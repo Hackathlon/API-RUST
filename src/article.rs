@@ -44,7 +44,6 @@ impl ArticleRequest {
 #[get("/article")]
 pub async fn list() -> HttpResponse {
     // TODO find the last 10 Articles and return them
-
     let articles = Articles { results: vec![] };
 
     HttpResponse::Ok()
@@ -53,7 +52,7 @@ pub async fn list() -> HttpResponse {
 }
 
 /// create a Article `/article`
-#[post("/Articles")]
+#[post("/article")]
 pub async fn create(article_req: Json<ArticleRequest>) -> HttpResponse {
     HttpResponse::Created()
         .content_type(APPLICATION_JSON)
@@ -82,7 +81,6 @@ pub async fn get(path: Path<(String, )>) -> HttpResponse {
 pub async fn delete(path: Path<(String, )>) -> HttpResponse {
     // TODO delete Article by ID
     // in any case return status 204
-
     HttpResponse::NoContent()
         .content_type(APPLICATION_JSON)
         .await

@@ -4,6 +4,7 @@ extern crate actix_web;
 mod article;
 mod constants;
 mod response;
+mod db;
 
 use std::{io, env};
 use actix_web::{App, HttpServer, middleware};

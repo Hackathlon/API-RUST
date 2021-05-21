@@ -13,28 +13,28 @@ pub type Articles = Response<Article>;
 pub struct Article {
     pub id: String,
     pub created_at: DateTime<Utc>,
-    pub message: String,
+    pub content: String,
 }
 
 impl Article {
-    pub fn new(message: String) -> Self {
+    pub fn new(content: String) -> Self {
         Self {
             id: Uuid::new_v4().to_string(),
             created_at: Utc::now(),
-            message,
+            content,
         }
     }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ArticleRequest {
-    pub message: Option<String>,
+    pub content: Option<String>,
 }
 
 impl ArticleRequest {
     pub fn to_article(&self) -> Option<Article> {
-        match &self.message {
-            Some(message) => Some(Article::new(message.to_string())),
+        match &self.content {
+            Some(content) => Some(Article::new(content.to_string())),
             None => None,
         }
     }

@@ -4,9 +4,11 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::constants::{APPLICATION_JSON};
+use crate::constants::{APPLICATION_JSON, MONGODB_URL};
 use crate::response::Response;
 use crate::db::DB;
+use mongodb::sync::Client;
+use mongodb::bson::{Document};
 
 pub type Articles = Response<Article>;
 
@@ -44,9 +46,14 @@ impl ArticleRequest {
 /// list 10 last Articles `/article`
 #[get("/article")]
 pub async fn list() -> HttpResponse {
-    // TODO find the last 10 Articles and return them
-    let db = DB::init();
-    let articles = Articles { results: db.fetch_articles().await.unwrap() };
+    let client = Client::with_uri_str(MONGODB_URL).unwrap();
+    let db = client.database("ez-tax");
+    let collection = db.collection::<Document>("articles");
+    let cursor = collection.find(None, None).unwrap();
+    let mut articles: Vec<Document> = vec![];
+    for r in cursor {
+        articles.push(r.unwrap());
+    }
 
     HttpResponse::Ok()
         .content_type(APPLICATION_JSON)

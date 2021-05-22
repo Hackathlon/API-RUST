@@ -45,6 +45,8 @@ async fn main() -> Result<(), Error> {
             .service(article::get)
             .service(article::create)
             .service(article::delete)
+            .service(user::get_usr)
+            .service(user::create_usr)
             .route("/", web::get().to(hello_world))
     })
         .bind("0.0.0.0:9090")?

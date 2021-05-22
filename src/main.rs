@@ -9,7 +9,8 @@ mod db;
 mod login;
 
 use std::{io, env};
-use actix_web::{App, HttpServer, middleware, Responder, web};
+use actix_web::{App, HttpServer, middleware, Responder, web, http};
+use actix_cors::Cors;
 use crate::db::DB;
 use std::io::Error;
 use mongodb::sync::Client;
@@ -41,6 +42,15 @@ async fn main() -> Result<(), Error> {
         App::new()
             // enable logger
             .wrap(middleware::Logger::default())
+            .wrap(Cors::default()
+                .allowed_origin("*")
+                .allowed_origin_fn(|origin, _req_head| {
+                    origin.as_bytes().ends_with(b".rust-lang.org")
+                })
+                .allowed_methods(vec!["GET", "POST"])
+                .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+                .allowed_header(http::header::CONTENT_TYPE)
+                .max_age(3600))
             // register HTTP requests handlers
             .service(article::list)
             .service(article::get)

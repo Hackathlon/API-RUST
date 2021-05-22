@@ -4,11 +4,11 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::constants::{APPLICATION_JSON, MONGODB_URL};
+use crate::constants::{APPLICATION_JSON, MONGODB_URL, MONGODB_DB, MONGODB_ARTICLE_COLL};
 use crate::response::Response;
 use crate::db::DB;
 use mongodb::sync::Client;
-use mongodb::bson::{Document};
+use mongodb::bson::{doc, Document};
 
 pub type Articles = Response<Article>;
 
@@ -47,8 +47,8 @@ impl ArticleRequest {
 #[get("/article")]
 pub async fn list() -> HttpResponse {
     let client = Client::with_uri_str(MONGODB_URL).unwrap();
-    let db = client.database("ez-tax");
-    let collection = db.collection::<Document>("articles");
+    let db = client.database(MONGODB_DB);
+    let collection = db.collection::<Document>(MONGODB_ARTICLE_COLL);
     let cursor = collection.find(None, None).unwrap();
     let mut articles: Vec<Document> = vec![];
     for r in cursor {
@@ -72,7 +72,17 @@ pub async fn create(article_req: Json<ArticleRequest>) -> HttpResponse {
 #[get("/article/{id}")]
 pub async fn get(path: Path<(String, )>) -> HttpResponse {
     // TODO find Article a Article by ID and return it
-    let found_article: Option<Article> = None;
+    let id = path.0.0;
+    let mut found_article: Option<Document> = None;
+
+    let client = Client::with_uri_str(MONGODB_URL).unwrap();
+    let db = client.database(MONGODB_DB);
+    let collection = db.collection::<Document>(MONGODB_ARTICLE_COLL);
+    let cursor = collection.find(doc! {"_id": id}, None).unwrap();
+    let mut articles: Vec<Document> = vec![];
+    for r in cursor {
+        found_article = Option::Some(r.unwrap());
+    }
 
     match found_article {
         Some(article) => HttpResponse::Ok()

@@ -6,6 +6,7 @@ mod user;
 mod constants;
 mod response;
 mod db;
+mod login;
 
 use std::{io, env};
 use actix_web::{App, HttpServer, middleware, Responder, web};
@@ -47,6 +48,7 @@ async fn main() -> Result<(), Error> {
             .service(article::delete)
             .service(user::get_usr)
             .service(user::create_usr)
+            .service(login::login)
             .route("/", web::get().to(hello_world))
     })
         .bind("0.0.0.0:9090")?

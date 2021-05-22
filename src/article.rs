@@ -87,7 +87,6 @@ pub async fn get(path: Path<(String, )>) -> HttpResponse {
     let db = client.database(MONGODB_DB);
     let collection = db.collection::<Document>(MONGODB_ARTICLE_COLL);
     let cursor = collection.find(doc! {"_id": id}, None).unwrap();
-    let mut articles: Vec<Document> = vec![];
     for r in cursor {
         found_article = Option::Some(r.unwrap());
     }

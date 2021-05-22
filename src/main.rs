@@ -39,18 +39,16 @@ async fn main() -> Result<(), Error> {
     env_logger::init();
 
     let server_res = HttpServer::new(|| {
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allowed_methods(vec!["GET", "POST", "DELETE"])
+            .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+            .allowed_header(http::header::CONTENT_TYPE)
+            .max_age(3600);
         App::new()
             // enable logger
             .wrap(middleware::Logger::default())
-            .wrap(Cors::default()
-                .allowed_origin("*")
-                .allowed_origin_fn(|origin, _req_head| {
-                    origin.as_bytes().ends_with(b".rust-lang.org")
-                })
-                .allowed_methods(vec!["GET", "POST"])
-                .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
-                .allowed_header(http::header::CONTENT_TYPE)
-                .max_age(3600))
+            .wrap(cors)
             // register HTTP requests handlers
             .service(article::list)
             .service(article::get)
@@ -61,7 +59,7 @@ async fn main() -> Result<(), Error> {
             .service(login::login)
             .route("/", web::get().to(hello_world))
     })
-        .bind("0.0.0.0:9090")?
+        .bind("127.0.0.1:9090")?
         .run()
         .await?;
     sys.await?;

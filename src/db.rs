@@ -1,19 +1,14 @@
-use mongodb::bson::{doc, Document, oid::ObjectId, Bson};
 use mongodb::{options::ClientOptions, Client, Collection};
 
 use crate::constants::{MONGODB_URL, MONGODB_DB, MONGODB_ARTICLE_COLL};
 use crate::article::Article;
 use mongodb::error::Error;
-use warp::{Rejection, Reply};
-use std::convert::Infallible;
-use warp::http::StatusCode;
 use futures::StreamExt;
-use chrono::{DateTime, Utc};
 
 
-const ID: &str = "_id";
-const CONTENT: &str = "content";
-const CREATED_AT: &str = "created_at";
+// const ID: &str = "_id";
+// const CONTENT: &str = "content";
+// const CREATED_AT: &str = "created_at";
 
 type Result<T> = std::result::Result<T, Error>;
 
@@ -39,21 +34,21 @@ impl DB {
 
         let mut result: Vec<Article> = Vec::new();
         while let Some(doc) = cursor.next().await {
-            result.push(self.doc_to_article(&doc?)?);
+            result.push(doc?);
         }
         Ok(result)
     }
 
-    fn get_collection(&self) -> Collection {
-        self.client.database(MONGODB_DB).collection(MONGODB_ARTICLE_COLL)
+    fn get_collection(&self) -> Collection<Article> {
+        self.client.database(MONGODB_DB).collection::<Article>(MONGODB_ARTICLE_COLL)
     }
 
-    fn doc_to_article(&self, doc: &Document) -> Result<Article> {
-        let id = doc.get_object_id(ID);
+    /*fn doc_to_article(&self, doc: &Document) -> Result<Article> {
+        /*let id = doc.get_object_id(ID);
         let content = doc.get_str(CONTENT);
         let added_at = doc.get_datetime(CREATED_AT);
 
-        /*let article = Article {
+        let article = Article {
             id: id.to_hex(),
             created_at: DateTime::from(*added_at),
             content: content.to_owned()
@@ -62,10 +57,7 @@ impl DB {
         Ok(Article {
             id: "".to_string(),
             created_at: Utc::now(),
-            content: "".to_string()
+            content: "".to_string(),
         })
-    }
-
-   
-
+    }*/
 }

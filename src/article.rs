@@ -63,6 +63,14 @@ pub async fn list() -> HttpResponse {
 #[post("/article")]
 pub async fn create(article_req: Json<ArticleRequest>) -> HttpResponse {
     let article = article_req.to_article().unwrap();
+    let client = Client::with_uri_str(MONGODB_URL).unwrap();
+    let db = client.database(MONGODB_DB);
+    let collection = db.collection::<Document>(MONGODB_ARTICLE_COLL);
+    collection.insert_one(doc! {
+        "_id": &article.id,
+        "content": &article.content
+    }, None);
+
     HttpResponse::Created()
         .content_type(APPLICATION_JSON)
         .json(article)

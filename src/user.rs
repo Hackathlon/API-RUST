@@ -64,7 +64,17 @@ pub async fn get_usr(path: Path<(String, )>)->HttpResponse {
 #[post("/user")]
 pub async fn create_usr(user_req: Json<UserRequest>) -> HttpResponse {
     let usr = user_req.to_user().unwrap();
-    HttpResponse::Ok()
+    let client = Client::with_uri_str(MONGODB_URL).unwrap();
+    let db = client.database("ez-tax");
+    let collection = db.collection::<Document>("users");
+    let send = collection.insert_one(doc!{
+        "firstname": &usr.firstname,
+        "lastname": &usr.lastname,
+        "email": &usr.email,
+        "passwd": &usr.passwd,
+    }, None);
+    HttpResponse::Created()
         .content_type(APPLICATION_JSON)
         .json(usr)
+        
 }

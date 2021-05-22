@@ -66,9 +66,9 @@ pub async fn get(path: Path<(String, )>) -> HttpResponse {
     let found_article: Option<Article> = None;
 
     match found_article {
-        Some(Article) => HttpResponse::Ok()
+        Some(article) => HttpResponse::Ok()
             .content_type(APPLICATION_JSON)
-            .json(Article),
+            .json(article),
         None => HttpResponse::NoContent()
             .content_type(APPLICATION_JSON)
             .await

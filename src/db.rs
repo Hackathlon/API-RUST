@@ -1,8 +1,10 @@
-use mongodb::{options::ClientOptions, Client, Collection};
+use mongodb::options::ClientOptions;
+use mongodb::sync::{Client, Collection};
+use mongodb::bson::{doc, Document};
+use mongodb::error::Error;
 
 use crate::constants::{MONGODB_URL, MONGODB_DB, MONGODB_ARTICLE_COLL};
 use crate::article::Article;
-use mongodb::error::Error;
 use futures::StreamExt;
 
 
@@ -18,32 +20,29 @@ pub struct DB {
 }
 
 impl DB {
-    pub async fn init() -> Result<Self> {
-        let mut client_options = ClientOptions::parse(MONGODB_URL).await?;
-        client_options.app_name = Some(MONGODB_DB.to_string());
-        Ok(Self {
-            client: Client::with_options(client_options)?,
-        })
+    pub fn init() -> Self {
+        DB {
+            client: Client::with_uri_str(MONGODB_URL).unwrap()
+        }
     }
-    pub async fn fetch_books(&self) -> Result<Vec<Article>> {
+    pub async fn fetch_articles(&self) -> Result<Vec<Article>> {
         let mut cursor = self
             .get_collection()
             .find(None, None)
-            .await
             .map_err(|e| e)?;// TODO do something
 
         let mut result: Vec<Article> = Vec::new();
-        while let Some(doc) = cursor.next().await {
-            result.push(doc?);
+        for doc in cursor {
+            result.push(self.doc_to_article(&doc?))
         }
         Ok(result)
     }
 
-    fn get_collection(&self) -> Collection<Article> {
-        self.client.database(MONGODB_DB).collection::<Article>(MONGODB_ARTICLE_COLL)
+    fn get_collection(&self) -> Collection<Document> {
+        self.client.database(MONGODB_DB).collection::<Document>(MONGODB_ARTICLE_COLL)
     }
 
-    /*fn doc_to_article(&self, doc: &Document) -> Result<Article> {
+    fn doc_to_article(&self, doc: &Document) -> Article {
         /*let id = doc.get_object_id(ID);
         let content = doc.get_str(CONTENT);
         let added_at = doc.get_datetime(CREATED_AT);
@@ -54,10 +53,10 @@ impl DB {
             content: content.to_owned()
         };
         Ok(article)*/
-        Ok(Article {
+        Article {
             id: "".to_string(),
-            created_at: Utc::now(),
+            //created_at: Utc::now(),
             content: "".to_string(),
-        })
-    }*/
+        }
+    }
 }

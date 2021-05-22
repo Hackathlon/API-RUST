@@ -6,13 +6,14 @@ use uuid::Uuid;
 
 use crate::constants::{APPLICATION_JSON};
 use crate::response::Response;
+use crate::db::DB;
 
 pub type Articles = Response<Article>;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Article {
     pub id: String,
-    pub created_at: DateTime<Utc>,
+    //pub created_at: DateTime<Utc>,
     pub content: String,
 }
 
@@ -20,7 +21,7 @@ impl Article {
     pub fn new(content: String) -> Self {
         Self {
             id: Uuid::new_v4().to_string(),
-            created_at: Utc::now(),
+            //created_at: Utc::now(),
             content,
         }
     }
@@ -44,7 +45,8 @@ impl ArticleRequest {
 #[get("/article")]
 pub async fn list() -> HttpResponse {
     // TODO find the last 10 Articles and return them
-    let articles = Articles { results: vec![] };
+    let db = DB::init();
+    let articles = Articles { results: db.fetch_articles().await.unwrap() };
 
     HttpResponse::Ok()
         .content_type(APPLICATION_JSON)

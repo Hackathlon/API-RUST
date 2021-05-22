@@ -61,10 +61,10 @@ pub async fn get_usr(path: Path<(String, )>)->HttpResponse {
         .json(usr.unwrap())
 }
 
-#[post("/user/")]
-pub async fn create_usr(path: Path<(String, )>)-> HttpResponse{
-    let usr :Option<Document> = None;
+#[post("/user")]
+pub async fn create_usr(user_req: Json<UserRequest>) -> HttpResponse {
+    let usr = user_req.to_user().unwrap();
     HttpResponse::Ok()
         .content_type(APPLICATION_JSON)
-        .json(usr.unwrap())
+        .json(usr)
 }

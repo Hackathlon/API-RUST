@@ -15,7 +15,6 @@ pub type Articles = Response<Article>;
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Article {
     pub id: String,
-    //pub created_at: DateTime<Utc>,
     pub content: String,
 }
 
@@ -63,9 +62,10 @@ pub async fn list() -> HttpResponse {
 /// create a Article `/article`
 #[post("/article")]
 pub async fn create(article_req: Json<ArticleRequest>) -> HttpResponse {
+    let article = article_req.to_article().unwrap();
     HttpResponse::Created()
         .content_type(APPLICATION_JSON)
-        .json(article_req.to_article())
+        .json(article)
 }
 
 /// find a Article by its id `/article/{id}`

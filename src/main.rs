@@ -2,6 +2,7 @@
 extern crate actix_web;
 
 mod article;
+mod user;
 mod constants;
 mod response;
 mod db;

@@ -89,10 +89,10 @@ pub async fn create_usr(user_req: Json<UserRequest>) -> HttpResponse {
         "firstname": &usr.firstname,
         "lastname": &usr.lastname,
         "email": &usr.email,
-        "passwd": hash,
+        "passwd": &hash,
     }, None);
     HttpResponse::Created()
         .content_type(APPLICATION_JSON)
-        .json(usr.id)
+        .json(hash)
         
 }

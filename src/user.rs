@@ -3,7 +3,7 @@ use actix_web::{HttpResponse};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-
+use sha2::{Sha256, Digest};
 use crate::constants::{APPLICATION_JSON, MONGODB_URL};
 use crate::response::Response;
 use crate::db::DB;
@@ -33,6 +33,21 @@ impl User{
         x
     }
 }
+
+
+// Utility functions
+fn is_email_valid(email: &str)-> bool{
+    let mut res = false;
+    let mut at = false;
+    for c in email.chars() {
+        if(c == '@'){ at = true;}
+        if at{ if c == '.'{ res = true;}}
+    }
+    res
+}
+
+
+
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserRequest{
@@ -67,14 +82,17 @@ pub async fn create_usr(user_req: Json<UserRequest>) -> HttpResponse {
     let client = Client::with_uri_str(MONGODB_URL).unwrap();
     let db = client.database("ez-tax");
     let collection = db.collection::<Document>("users");
+    let mut hasher = Sha256::new();
+    hasher.update(&usr.passwd);
+    let hash: String = format!("{:X}", hasher.finalize());
     let send = collection.insert_one(doc!{
         "firstname": &usr.firstname,
         "lastname": &usr.lastname,
         "email": &usr.email,
-        "passwd": &usr.passwd,
+        "passwd": hash,
     }, None);
     HttpResponse::Created()
         .content_type(APPLICATION_JSON)
-        .json(usr)
+        .json(usr.id)
         
 }
